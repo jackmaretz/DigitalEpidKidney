@@ -1,0 +1,11 @@
+scrivere funzione che retrieva dati da google in base alla query che gli butti dentro e che poi usa quei dati per avere una correlazione con i dati che abbiamo gia dal sito della sanità.
+
+input : 
+
+	q = "query for google trends", (see if is possible via API)
+	y = year,
+	type = "Crude" or "Age-adjusted",
+
+output : 
+
+	if possible get correlation array with a value for every year [2011-2016]

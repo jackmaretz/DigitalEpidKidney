@@ -1,0 +1,689 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "##### 1.1a\n",
+    "- Rescaling values required\n",
+    "- I want to get a correlation value per state (crude)\n",
+    "- I want to get a correlation value per state (age adjusted)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "##### 1.1b\n",
+    "- I want to get a correlation per year of all the states.\n",
+    "so: "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "for states in states:\n",
+    "    cor.append(cor(statesYear1,stateYear1))\n",
+    "    "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 41,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "from scipy.stats.stats import pearsonr\n",
+    "import warnings\n",
+    "warnings.filterwarnings('ignore')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 42,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "states = {\n",
+    "        'AK': 'Alaska',\n",
+    "        'AL': 'Alabama',\n",
+    "        'AR': 'Arkansas',\n",
+    "        'AS': 'American Samoa',\n",
+    "        'AZ': 'Arizona',\n",
+    "        'CA': 'California',\n",
+    "        'CO': 'Colorado',\n",
+    "        'CT': 'Connecticut',\n",
+    "        'DC': 'District of Columbia',\n",
+    "        'DE': 'Delaware',\n",
+    "        'FL': 'Florida',\n",
+    "        'GA': 'Georgia',\n",
+    "        'GU': 'Guam',\n",
+    "        'HI': 'Hawaii',\n",
+    "        'IA': 'Iowa',\n",
+    "        'ID': 'Idaho',\n",
+    "        'IL': 'Illinois',\n",
+    "        'IN': 'Indiana',\n",
+    "        'KS': 'Kansas',\n",
+    "        'KY': 'Kentucky',\n",
+    "        'LA': 'Louisiana',\n",
+    "        'MA': 'Massachusetts',\n",
+    "        'MD': 'Maryland',\n",
+    "        'ME': 'Maine',\n",
+    "        'MI': 'Michigan',\n",
+    "        'MN': 'Minnesota',\n",
+    "        'MO': 'Missouri',\n",
+    "        'MP': 'Northern Mariana Islands',\n",
+    "        'MS': 'Mississippi',\n",
+    "        'MT': 'Montana',\n",
+    "        'NA': 'National',\n",
+    "        'NC': 'North Carolina',\n",
+    "        'ND': 'North Dakota',\n",
+    "        'NE': 'Nebraska',\n",
+    "        'NH': 'New Hampshire',\n",
+    "        'NJ': 'New Jersey',\n",
+    "        'NM': 'New Mexico',\n",
+    "        'NV': 'Nevada',\n",
+    "        'NY': 'New York',\n",
+    "        'OH': 'Ohio',\n",
+    "        'OK': 'Oklahoma',\n",
+    "        'OR': 'Oregon',\n",
+    "        'PA': 'Pennsylvania',\n",
+    "        'PR': 'Puerto Rico',\n",
+    "        'RI': 'Rhode Island',\n",
+    "        'SC': 'South Carolina',\n",
+    "        'SD': 'South Dakota',\n",
+    "        'TN': 'Tennessee',\n",
+    "        'TX': 'Texas',\n",
+    "        'UT': 'Utah',\n",
+    "        'VA': 'Virginia',\n",
+    "        'VI': 'Virgin Islands',\n",
+    "        'VT': 'Vermont',\n",
+    "        'WA': 'Washington',\n",
+    "        'WI': 'Wisconsin',\n",
+    "        'WV': 'West Virginia',\n",
+    "        'WY': 'Wyoming'\n",
+    "}"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 69,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from pytrends.request import TrendReq\n",
+    "\n",
+    "pytrends = TrendReq(hl='en-US', tz=360)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 74,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "def getCor(query,year,gt_Year_Type,type_):\n",
+    "    \n",
+    "    if year == 2011:\n",
+    "        year = '2011-01-01 2011-12-31'\n",
+    "    if year == 2012:\n",
+    "        year = '2012-01-01 2012-12-31'\n",
+    "    if year == 2013:\n",
+    "        year = '2013-01-01 2013-12-31'\n",
+    "    if year == 2014:\n",
+    "        year = '2014-01-01 2014-12-31'\n",
+    "    if year == 2015:\n",
+    "        year = '2015-01-01 2015-12-31'\n",
+    "    if year == 2016:\n",
+    "        year = '2016-01-01 2016-12-31'\n",
+    "    \n",
+    "    #kw_list = query\n",
+    "    kw_list=['kidney']\n",
+    "    pytrends.build_payload(kw_list, cat=0, timeframe=year, geo='US', gprop='')\n",
+    "    print(pytrends.interest_by_region())\n",
+    "    #if type_ == \"AAP\":\n",
+    "    #    df_gt = pd.read_csv(gt_Year_Type, sep=\";\")\n",
+    "    #if type_ == \"CP\":\n",
+    "    #    df_gt = pd.read_csv(gt_Year_Type, sep=\";\")\n",
+    "\n",
+    "    df_gt = pd.read_csv(gt_Year_Type, sep=\";\")\n",
+    "    df_gt = df_gt[np.logical_not(pd.to_numeric(df_gt.LocationAbbr, errors='coerce').notnull())]\n",
+    "    df_gt = df_gt.dropna(subset=['LocationAbbr']) \n",
+    "#   googleTrend = outputQueryAPI (query,year)  # GABRIEL API\n",
+    "    googleTrend = pd.read_csv(query,sep=\",\")\n",
+    "\n",
+    "\n",
+    "    g = (googleTrend[1:])\n",
+    "    g = g.convert_objects(convert_numeric=True)\n",
+    "    g = g.sort_index()\n",
+    "    google_values = [x[0] for x in g.values]\n",
+    "    google_states = []\n",
+    "    st = dict((y,x) for x, y in states.items())\n",
+    "    index = list(g.index)\n",
+    "    google_states = []\n",
+    "    for state in st:\n",
+    "        if state in index:\n",
+    "            google_states.append(st[state])\n",
+    "    d = {'idx': google_values, 'stat': google_states}\n",
+    "    d = pd.DataFrame(data=d)\n",
+    "    df2_gt = df_gt\n",
+    "    df2_gt = df2_gt[df2_gt['LocationAbbr'].isin(google_states)]\n",
+    "\n",
+    "    # create a compact ground truth dataframe\n",
+    "    df2_gt = pd.DataFrame(data=list(df2_gt.Data_Value), index=list(df2_gt.LocationAbbr), columns=['value'],\n",
+    "                          dtype=np.float)\n",
+    "\n",
+    "    google_df = pd.DataFrame(data=google_values, index=google_states, columns=['value'], dtype=np.float)\n",
+    "\n",
+    "    # normalizing\n",
+    "    df2_gt = (df2_gt - df2_gt.mean())/df2_gt.std()\n",
+    "    google_df = (google_df - google_df.mean())/google_df.std()\n",
+    "\n",
+    "    # order\n",
+    "    df2_gt = df2_gt.sort_index()\n",
+    "    google_df = google_df.sort_index()\n",
+    "    cor = pearsonr(df2_gt, google_df)[0][0]\n",
+    "    \n",
+    "    return cor\n",
+    "\n",
+    "\n",
+    "\n",
+    "\n",
+    "#getCor(gt_Year_Type=\"data/BRFSS/2013_AA.csv\",query=\"data/GoogleTrends/2013_kidneyDysplasia.csv\",year = 1,type_= \"AA\")\n",
+    "nQueries = 10\n",
+    "nYears = 6\n",
+    "corrMat = np.empty(shape=(nQueries*nYears,2))"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 75,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "                      kidney\n",
+      "geoName                     \n",
+      "Alabama                   84\n",
+      "Alaska                    69\n",
+      "Arizona                   77\n",
+      "Arkansas                  84\n",
+      "California                60\n",
+      "Colorado                  63\n",
+      "Connecticut               69\n",
+      "Delaware                  72\n",
+      "District of Columbia      67\n",
+      "Florida                   73\n",
+      "Georgia                   79\n",
+      "Hawaii                    75\n",
+      "Idaho                     73\n",
+      "Illinois                  70\n",
+      "Indiana                   76\n",
+      "Iowa                      73\n",
+      "Kansas                    71\n",
+      "Kentucky                  92\n",
+      "Louisiana                 80\n",
+      "Maine                     76\n",
+      "Maryland                  73\n",
+      "Massachusetts             68\n",
+      "Michigan                  76\n",
+      "Minnesota                 72\n",
+      "Mississippi               88\n",
+      "Missouri                  79\n",
+      "Montana                   69\n",
+      "Nebraska                  73\n",
+      "Nevada                    65\n",
+      "New Hampshire             71\n",
+      "New Jersey                69\n",
+      "New Mexico                76\n",
+      "New York                  69\n",
+      "North Carolina            80\n",
+      "North Dakota              78\n",
+      "Ohio                      80\n",
+      "Oklahoma                  78\n",
+      "Oregon                    69\n",
+      "Pennsylvania              77\n",
+      "Rhode Island              69\n",
+      "South Carolina            84\n",
+      "South Dakota              75\n",
+      "Tennessee                 89\n",
+      "Texas                     70\n",
+      "Utah                      72\n",
+      "Vermont                   71\n",
+      "Virginia                  73\n",
+      "Washington                73\n",
+      "West Virginia            100\n",
+      "Wisconsin                 70\n",
+      "Wyoming                   71\n"
+     ]
+    },
+    {
+     "data": {
+      "text/plain": [
+       "0.07684409318748793"
+      ]
+     },
+     "execution_count": 75,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "getCor(gt_Year_Type=\"data/BRFSS/2013_AA.csv\",query=\"data/GoogleTrends/2013_kidneyDysplasia.csv\",year = 2011,type_= \"AA\")\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 63,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[  7.68440932e-002,  -1.49457921e-154],\n",
+       "       [  4.44659081e-322,   7.68440932e-002],\n",
+       "       [  6.94774606e-310,   4.17201348e-309],\n",
+       "       [  0.00000000e+000,   9.30767194e+165],\n",
+       "       [  0.00000000e+000,   3.53616037e-057],\n",
+       "       [  0.00000000e+000,   8.34402697e-309],\n",
+       "       [  0.00000000e+000,   2.21207078e-314],\n",
+       "       [              nan,   0.00000000e+000],\n",
+       "       [  2.14598969e-314,   2.56914136e-322],\n",
+       "       [  6.94774401e-310,   2.21364958e-314],\n",
+       "       [  2.14651947e-314,   2.17357656e-314],\n",
+       "       [  0.00000000e+000,   6.94774615e-310],\n",
+       "       [  0.00000000e+000,   0.00000000e+000],\n",
+       "       [  0.00000000e+000,   0.00000000e+000],\n",
+       "       [  0.00000000e+000,   0.00000000e+000],\n",
+       "       [  1.12465777e-312,   0.00000000e+000],\n",
+       "       [  3.77715251e-312,   2.58883486e-312],\n",
+       "       [  2.12199584e-314,   2.14614358e-314],\n",
+       "       [  1.11588644e+191,   2.21343345e-314],\n",
+       "       [  2.14614359e-314,  -3.15064310e+226],\n",
+       "       [  2.21347089e-314,   2.14614361e-314],\n",
+       "       [  2.15952105e+021,   2.21345350e-314],\n",
+       "       [  2.14614362e-314,  -1.70862074e+127],\n",
+       "       [  2.21338744e-314,   2.14614364e-314],\n",
+       "       [ -1.21172096e+129,   2.21337938e-314],\n",
+       "       [  2.14614366e-314,  -2.18748901e-219],\n",
+       "       [  2.21336879e-314,   2.14614367e-314],\n",
+       "       [  5.90329635e-261,   2.21352448e-314],\n",
+       "       [  2.14614369e-314,  -2.27920573e-235],\n",
+       "       [  2.21352363e-314,   2.14614370e-314],\n",
+       "       [  2.75849630e+224,   2.21334817e-314],\n",
+       "       [  2.14600477e-314,   0.00000000e+000],\n",
+       "       [  0.00000000e+000,   0.00000000e+000],\n",
+       "       [  2.14600477e-314,   2.17410966e-314],\n",
+       "       [  6.94774412e-310,   2.15764142e-314],\n",
+       "       [  2.14648846e-314,   0.00000000e+000],\n",
+       "       [  0.00000000e+000,   0.00000000e+000],\n",
+       "       [  0.00000000e+000,   0.00000000e+000],\n",
+       "       [  0.00000000e+000,   0.00000000e+000],\n",
+       "       [  0.00000000e+000,   0.00000000e+000],\n",
+       "       [  0.00000000e+000,   0.00000000e+000],\n",
+       "       [  0.00000000e+000,   0.00000000e+000],\n",
+       "       [  0.00000000e+000,   0.00000000e+000],\n",
+       "       [  2.21330413e-314,   2.21841184e-314],\n",
+       "       [  2.20336312e-314,   2.21275071e-314],\n",
+       "       [  2.14600477e-314,   2.18757203e-314],\n",
+       "       [  2.21688548e-314,   2.21688553e-314],\n",
+       "       [  2.21688558e-314,   2.21688564e-314],\n",
+       "       [  2.21688569e-314,   2.21688574e-314],\n",
+       "       [  2.21688579e-314,   2.21688584e-314],\n",
+       "       [  2.21688589e-314,   2.21688594e-314],\n",
+       "       [  2.21688600e-314,   2.21688605e-314],\n",
+       "       [  2.21688610e-314,   2.21688615e-314],\n",
+       "       [  2.21688620e-314,   2.21688625e-314],\n",
+       "       [ -2.68156159e+154,  -2.68679479e+154],\n",
+       "       [  7.26606878e+223,   2.21627555e-314],\n",
+       "       [ -2.68156159e+154,   2.68679479e+154],\n",
+       "       [ -2.68156159e+154,   1.11427387e-307],\n",
+       "       [ -1.73060449e-077,  -2.68156159e+154],\n",
+       "       [  2.21379052e-314,   2.21381048e-314]])"
+      ]
+     },
+     "execution_count": 63,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "corrMat[0,0] = getCor(gt_Year_Type=\"data/BRFSS/2013_AA.csv\",query=\"data/GoogleTrends/2013_kidneyDysplasia.csv\",year = 1,type_= \"AA\")\n",
+    "\n",
+    "corrMat"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Ground Truth data treatment"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "df_gt = pd.read_csv(\"data/BRFSS/2013_AA.csv\", sep=\";\")#2016 210\n",
+    "df_gt = df_gt[np.logical_not(pd.to_numeric(df_gt.LocationAbbr, errors='coerce').notnull())]\n",
+    "df_gt = df_gt.dropna(subset=['LocationAbbr'])   #Drop only if NaN in specific column (as asked in the question)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Google data treatment"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "                      Category: Health\n",
+      "Alabama                            100\n",
+      "Arizona                             12\n",
+      "California                          13\n",
+      "Colorado                            17\n",
+      "Connecticut                         19\n",
+      "District of Columbia                37\n",
+      "Florida                             11\n",
+      "Georgia                             13\n",
+      "Illinois                            18\n",
+      "Indiana                             36\n",
+      "Kentucky                            43\n",
+      "Louisiana                           20\n",
+      "Maryland                            34\n",
+      "Massachusetts                       34\n",
+      "Michigan                            29\n",
+      "Minnesota                           11\n",
+      "Missouri                            27\n",
+      "New Jersey                          19\n",
+      "New York                            13\n",
+      "North Carolina                      17\n",
+      "Ohio                                13\n",
+      "Oklahoma                            23\n",
+      "Oregon                              16\n",
+      "Pennsylvania                        20\n",
+      "South Carolina                      31\n",
+      "Tennessee                           13\n",
+      "Texas                               18\n",
+      "Virginia                            30\n",
+      "Washington                          28\n",
+      "Wisconsin                           20\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/Users/giacomomaretto/anaconda3/lib/python3.6/site-packages/ipykernel_launcher.py:3: FutureWarning: convert_objects is deprecated.  Use the data-type specific converters pd.to_datetime, pd.to_timedelta and pd.to_numeric.\n",
+      "  This is separate from the ipykernel package so we can avoid doing imports until\n"
+     ]
+    }
+   ],
+   "source": [
+    "gk2011 = pd.read_csv(\"data/GoogleTrends/2013_kidneyDysplasia.csv\",sep=\",\")\n",
+    "g = (gk2011[1:])\n",
+    "g = g.convert_objects(convert_numeric=True)\n",
+    "g = g.sort_index()\n",
+    "#g= dict(keys=list(g.index),values = g.values)\n",
+    "print((g))\n",
+    "google_values = [x[0] for x in g.values]"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "['Alabama',\n",
+       " 'Arizona',\n",
+       " 'California',\n",
+       " 'Colorado',\n",
+       " 'Connecticut',\n",
+       " 'District of Columbia',\n",
+       " 'Florida',\n",
+       " 'Georgia',\n",
+       " 'Illinois',\n",
+       " 'Indiana',\n",
+       " 'Kentucky',\n",
+       " 'Louisiana',\n",
+       " 'Maryland',\n",
+       " 'Massachusetts',\n",
+       " 'Michigan',\n",
+       " 'Minnesota',\n",
+       " 'Missouri',\n",
+       " 'New Jersey',\n",
+       " 'New York',\n",
+       " 'North Carolina',\n",
+       " 'Ohio',\n",
+       " 'Oklahoma',\n",
+       " 'Oregon',\n",
+       " 'Pennsylvania',\n",
+       " 'South Carolina',\n",
+       " 'Tennessee',\n",
+       " 'Texas',\n",
+       " 'Virginia',\n",
+       " 'Washington',\n",
+       " 'Wisconsin']"
+      ]
+     },
+     "execution_count": 26,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "list(g.index)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "states = {\n",
+    "        'AK': 'Alaska',\n",
+    "        'AL': 'Alabama',\n",
+    "        'AR': 'Arkansas',\n",
+    "        'AS': 'American Samoa',\n",
+    "        'AZ': 'Arizona',\n",
+    "        'CA': 'California',\n",
+    "        'CO': 'Colorado',\n",
+    "        'CT': 'Connecticut',\n",
+    "        'DC': 'District of Columbia',\n",
+    "        'DE': 'Delaware',\n",
+    "        'FL': 'Florida',\n",
+    "        'GA': 'Georgia',\n",
+    "        'GU': 'Guam',\n",
+    "        'HI': 'Hawaii',\n",
+    "        'IA': 'Iowa',\n",
+    "        'ID': 'Idaho',\n",
+    "        'IL': 'Illinois',\n",
+    "        'IN': 'Indiana',\n",
+    "        'KS': 'Kansas',\n",
+    "        'KY': 'Kentucky',\n",
+    "        'LA': 'Louisiana',\n",
+    "        'MA': 'Massachusetts',\n",
+    "        'MD': 'Maryland',\n",
+    "        'ME': 'Maine',\n",
+    "        'MI': 'Michigan',\n",
+    "        'MN': 'Minnesota',\n",
+    "        'MO': 'Missouri',\n",
+    "        'MP': 'Northern Mariana Islands',\n",
+    "        'MS': 'Mississippi',\n",
+    "        'MT': 'Montana',\n",
+    "        'NA': 'National',\n",
+    "        'NC': 'North Carolina',\n",
+    "        'ND': 'North Dakota',\n",
+    "        'NE': 'Nebraska',\n",
+    "        'NH': 'New Hampshire',\n",
+    "        'NJ': 'New Jersey',\n",
+    "        'NM': 'New Mexico',\n",
+    "        'NV': 'Nevada',\n",
+    "        'NY': 'New York',\n",
+    "        'OH': 'Ohio',\n",
+    "        'OK': 'Oklahoma',\n",
+    "        'OR': 'Oregon',\n",
+    "        'PA': 'Pennsylvania',\n",
+    "        'PR': 'Puerto Rico',\n",
+    "        'RI': 'Rhode Island',\n",
+    "        'SC': 'South Carolina',\n",
+    "        'SD': 'South Dakota',\n",
+    "        'TN': 'Tennessee',\n",
+    "        'TX': 'Texas',\n",
+    "        'UT': 'Utah',\n",
+    "        'VA': 'Virginia',\n",
+    "        'VI': 'Virgin Islands',\n",
+    "        'VT': 'Vermont',\n",
+    "        'WA': 'Washington',\n",
+    "        'WI': 'Wisconsin',\n",
+    "        'WV': 'West Virginia',\n",
+    "        'WY': 'Wyoming'\n",
+    "}\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "google_states = []\n",
+    "st = dict((y,x) for x, y in states.items())\n",
+    "index = list(g.index)\n",
+    "google_states = []\n",
+    "for state in st:\n",
+    "    if state in index:\n",
+    "        google_states.append(st[state])\n",
+    "#print(len(google_states), len(google_values))\n",
+    "#len(set(google_values).difference(set(google_states)))\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "d = {'idx': google_values, 'stat': google_states}\n",
+    "d = pd.DataFrame(data=d)\n",
+    "#dpd.DataFrame(data = df, columns= ['idx','stat'])"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# select the same states on the GT and the Google data (standardize)\n",
+    "df2_gt = df_gt\n",
+    "df2_gt = df2_gt[df2_gt['LocationAbbr'].isin(google_states)]\n",
+    "\n",
+    "# create a compact ground truth dataframe\n",
+    "df2_gt = pd.DataFrame(data=list(df2_gt.Data_Value), index=list(df2_gt.LocationAbbr), columns=['value'],\n",
+    "                      dtype=np.float)\n",
+    "\n",
+    "google_df = pd.DataFrame(data=google_values, index=google_states, columns=['value'], dtype=np.float)\n",
+    "\n",
+    "# normalizing\n",
+    "df2_gt = (df2_gt - df2_gt.mean())/df2_gt.std()\n",
+    "google_df = (google_df - google_df.mean())/google_df.std()\n",
+    "\n",
+    "# order\n",
+    "df2_gt = df2_gt.sort_index()\n",
+    "google_df = google_df.sort_index()\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "from pydoc import help\n",
+    "from scipy.stats.stats import pearsonr\n",
+    "#help(pearsonr)\n",
+    "cor11 = pearsonr(df2_gt, google_df)[0][0]\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "0.07684409318748793"
+      ]
+     },
+     "execution_count": 32,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "cor11"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "metadata": {},
+   "outputs": [],
+   "source": []
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.6.3"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
