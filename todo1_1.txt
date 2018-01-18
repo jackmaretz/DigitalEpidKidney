@@ -13,4 +13,10 @@ output :
 ________________
 
  todo ex 2
- 
+
+ -	write Data frame ready for regression model
+ 	-	needed:
+ 		-	array of index for each query term of **shape**: (6y*50states, #keyWords)
+ 		-	array of year category **shape**: (50 year(i)*y(i),1)
+ 		-	array of index per state per year from Census **shape**: (6y*50states,1)
+ 		-	array of response variable from Ground Truth **shape**: (6y*50states,1)
