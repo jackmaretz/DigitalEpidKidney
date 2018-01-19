@@ -26,3 +26,4 @@ todo update 1.1
 
 -	write getCor() function that uses matrix K of keyword
 	loop for each k_i and get corr with long vect of index all years together.
+-	check if states are same and right order
