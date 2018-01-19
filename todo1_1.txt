@@ -20,3 +20,9 @@ ________________
  		-	array of year category **shape**: (50 year(i)*y(i),1)
  		-	array of index per state per year from Census **shape**: (6y*50states,1)
  		-	array of response variable from Ground Truth **shape**: (6y*50states,1)
+_______________
+
+todo update 1.1
+
+-	write getCor() function that uses matrix K of keyword
+	loop for each k_i and get corr with long vect of index all years together.
